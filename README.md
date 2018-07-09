@@ -1,36 +1,55 @@
-![use packer to create iso with dtr front](https://user-images.githubusercontent.com/37847249/42431071-1e43b452-8311-11e8-95bc-944535800838.jpg)
-******
-## Packer Ubuntu Vagrant Box with Docker Registry Pre Installed 
+# Packer Example - Ubuntu 16.04 minimal Vagrant Box
 
+**Current Ubuntu Version Used**: 16.04.2
 
-### Agenda:
-##### Provisioning of Docker Registry with Packer & Vagrant
+**Pre-built Vagrant Box**:
 
-#### Use Case:
-##### Automated provisioning of the enterprise level Docker Registry through Packer.
-##### Registry will be used to store the Docker images.
+  - [`vagrant init geerlingguy/ubuntu1604`](https://vagrantcloud.com/geerlingguy/boxes/ubuntu1604)
+  - See older versions: http://files.midwesternmac.com/
 
-#### Tools Used:
-- [Packer Hashicorp](https://www.packer.io/intro/index.html)
-- [Virtual Box](https://www.virtualbox.org/wiki/Downloads)
-- [Ubutnu 18.04.iso with Checksum type SHA256](http://releases.ubuntu.com/18.04/)
-- [Vagrant](https://www.vagrantup.com/intro/index.html)
-- [Docker](https://docs.docker.com/get-started/)
-- [Docker Registry Image](https://docs.docker.com/registry/)
+This example build configuration installs and configures Ubuntu 16.04 x86_64 minimal using Ansible, and then generates two Vagrant box files, for:
 
-## Packer Template
-![use packer to create iso with dtr_packer template](https://user-images.githubusercontent.com/37847249/42431751-3e7566e0-8315-11e8-9c1f-40760d5b550a.jpg)
-> Here showing an example of packer template with builders, provisioners and post-processors. Were `Template` is a JSON file containing the build information, `Provisioner` are tools that install software after the initial OS install, `Post-Processors` are Action to happen after image has to built.
+  - VirtualBox
+  - VMware
 
-#### Overview of above
+The example can be modified to use more Ansible roles, plays, and included playbooks to fully configure (or partially) configure a box file suitable for deployment for development environments.
 
-![use packer to create iso with dtr](https://user-images.githubusercontent.com/37847249/42431616-a570b7c4-8314-11e8-9bcd-9d008c033348.jpg)
-****
-## Workflow - Docker Registry of Packer and Vagrant
-![use packer to create iso with dtr-workflow](https://user-images.githubusercontent.com/37847249/42432149-3660635e-8317-11e8-83c4-2a0cebcb3dbd.jpg)
+## Requirements
 
-### Author
-Lalith Kumar
+The following software must be installed/present on your local machine before you can use Packer to build the Vagrant box file:
 
-#### Licence
-MIT
+  - [Packer](http://www.packer.io/)
+  - [Vagrant](http://vagrantup.com/)
+  - [VirtualBox](https://www.virtualbox.org/) (if you want to build the VirtualBox box)
+  - [VMware Fusion](http://www.vmware.com/products/fusion/) (or Workstation - if you want to build the VMware box)
+  - [Ansible](http://docs.ansible.com/intro_installation.html)
+
+## Usage
+
+Make sure all the required software (listed above) is installed, then cd to the directory containing this README.md file, and run:
+
+    $ packer build ubuntu1604.json
+
+After a few minutes, Packer should tell you the box was generated successfully.
+
+If you want to only build a box for one of the supported virtualization platforms (e.g. only build the VMware box), add `--only=vmware-iso` to the `packer build` command:
+
+    $ packer build --only=vmware-iso debian8.json
+
+## Testing built boxes
+
+There's an included Vagrantfile that allows quick testing of the built Vagrant boxes. From this same directory, run one of the following commands after building the boxes:
+
+    # For VMware Fusion:
+    $ vagrant up vmware --provider=vmware_fusion
+    
+    # For VirtualBox:
+    $ vagrant up virtualbox --provider=virtualbox
+
+## License
+
+MIT license.
+
+## Author Information
+
+Created in 2016 by [Jeff Geerling](http://jeffgeerling.com/), author of [Ansible for DevOps](http://ansiblefordevops.com/).
