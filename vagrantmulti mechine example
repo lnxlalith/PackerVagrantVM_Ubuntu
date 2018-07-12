@@ -1,0 +1,83 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+  config.ssh.insert_key = false
+  config.vm.synced_folder '.', '/vagrant', type: 'nfs'
+
+  # VirtualBox.
+  # `vagrant up virtualbox --provider=virtualbox`
+  
+  config.vm.define "s2" do |s2|
+    virtualbox.vm.hostname = "s2"
+    virtualbox.vm.box = "file://builds/virtualbox-ubuntu1604.box"
+    virtualbox.vm.network :private_network, ip: "172.16.3.2"
+
+    config.vm.provider :virtualbox do |v|
+      v.gui = false
+      v.memory = 1024
+      v.cpus = 1
+      v.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+      v.customize ["modifyvm", :id, "--ioapic", "on"]
+    
+    config.vm.provision "shell", inline: <<-SHELL
+      consul agent -server -data-dir /tmp/consul
+    SHELL
+
+  end
+
+  config.vm.define "s3" do |s3|
+    virtualbox.vm.hostname = "s3"
+    virtualbox.vm.box = "file://builds/virtualbox-ubuntu1604.box"
+    virtualbox.vm.network :private_network, ip: "172.16.3.3"
+
+    config.vm.provider :virtualbox do |v|
+      v.gui = false
+      v.memory = 1024
+      v.cpus = 1
+      v.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+      v.customize ["modifyvm", :id, "--ioapic", "on"]
+    
+    config.vm.provision "shell", inline: <<-SHELL
+      consul agent -server -data-dir /tmp/consul
+    SHELL
+
+  end
+
+  config.vm.define "s1" do |s1|
+    virtualbox.vm.hostname = "s1"
+    virtualbox.vm.box = "file://builds/virtualbox-ubuntu1604.box"
+    virtualbox.vm.network :private_network, ip: "172.16.3.1"
+
+    config.vm.provider :virtualbox do |v|
+      v.gui = false
+      v.memory = 1024
+      v.cpus = 1
+      v.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+      v.customize ["modifyvm", :id, "--ioapic", "on"]
+    
+    config.vm.provision "shell", inline: <<-SHELL
+      consul agent -server -bootstrap -data-dir /tmp/consul 
+      consul join 172.16.3.2 172.16.3.3
+    SHELL
+
+  end
+
+  config.vm.define "client" do |client|
+    virtualbox.vm.hostname = "client"
+    virtualbox.vm.box = "file://builds/virtualbox-ubuntu1604.box"
+    virtualbox.vm.network :private_network, ip: "172.16.3.4"
+
+    config.vm.provider :virtualbox do |v|
+      v.gui = false
+      v.memory = 1024
+      v.cpus = 1
+      v.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+      v.customize ["modifyvm", :id, "--ioapic", "on"]
+    
+    config.vm.provision "shell", inline: <<-SHELL
+      consul agent -data-dir /tmp/consul -client 172.16.3.4 -ui-dir dist/ -join 172.16.3.1
+    SHELL
+
+  end
+end
